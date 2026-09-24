@@ -1,0 +1,102 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentra"
+version = "0.1.0"
+description = "SENTRA — AI-Assisted Multimodal Distress & Vulnerability Screening (SIH 2026)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+
+dependencies = [
+    "streamlit>=1.40.0",
+    "pydantic>=2.8.0",
+    "pydantic-settings>=2.4.0",
+    "sqlalchemy>=2.0.0",
+    "alembic>=1.13.0",
+    "psycopg2-binary>=2.9.0",
+    "python-dotenv>=1.0.0",
+    "openai>=1.51.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-cov>=5.0.0",
+    "pytest-mock>=3.14.0",
+    "ruff>=0.6.0",
+]
+
+[project.scripts]
+sentra = "sentra.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# ---------------------------------------------------------------------------
+# Ruff
+# ---------------------------------------------------------------------------
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "ANN", # flake8-annotations (partial)
+    "S",   # bandit security
+    "T20", # no print statements in library code
+]
+ignore = [
+    "ANN401",  # Dynamically typed expressions (Any) are disallowed
+    "S101",    # use of assert — allowed in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "ANN", "T20"]
+"src/sentra/ui/**/*.py" = ["T20"]
+"src/sentra/main.py" = ["T20"]
+"alembic/**/*.py" = ["ANN", "T20", "N999"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sentra"]
+
+# ---------------------------------------------------------------------------
+# pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--tb=short",
+    "-v",
+]
+markers = [
+    "unit: fast unit tests with no external dependencies",
+    "integration: tests that require a database or external service",
+    "safety: tests for safety-critical behavior",
+]
+
+# ---------------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["src/sentra"]
+omit = ["*/migrations/*", "*/alembic/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false

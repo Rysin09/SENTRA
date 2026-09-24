@@ -1,0 +1,65 @@
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# ── Secrets — NEVER commit these ─────────────────────────────────────────────
+.env
+*.pem
+*.key
+*.p12
+*.pfx
+
+# ── Local dev database (SQLite fallback) ─────────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+
+# ── Tooling ──────────────────────────────────────────────────────────────────
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+.hypothesis/
+
+# ── IDE ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Data — never commit real victim data ─────────────────────────────────────
+data/real/
+data/uploads/
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.m4a
+
+# ── Alembic auto-generated (keep migrations, not locks) ──────────────────────
+# (migrations/ is intentionally tracked)
+
+# ── Streamlit cache ───────────────────────────────────────────────────────────
+.streamlit/secrets.toml

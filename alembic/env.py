@@ -1,0 +1,82 @@
+"""
+SENTRA — Alembic environment configuration.
+
+This file is run by Alembic's migration tooling. It imports the SQLAlchemy
+Base metadata so that ``--autogenerate`` can detect model changes.
+
+Supports both PostgreSQL (staging/production) and SQLite (local dev fallback).
+SQLite requires ``render_as_batch=True`` for ALTER TABLE compatibility.
+"""
+
+from __future__ import annotations
+
+from logging.config import fileConfig
+
+from alembic import context
+from sqlalchemy import engine_from_config, pool
+
+# Alembic Config object gives access to values in alembic.ini.
+config = context.config
+
+# Set up Python logging from alembic.ini if present.
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+# Import Base so autogenerate can detect all mapped tables.
+# Importing models ensures they are registered on Base.metadata.
+from sentra.database.base import Base  # noqa: E402
+import sentra.database.models  # noqa: E402, F401  # registers all ORM models
+
+target_metadata = Base.metadata
+
+
+def get_url() -> str:
+    """Read the DATABASE_URL from app settings (respects .env)."""
+    from sentra.config.settings import get_settings
+
+    return get_settings().database_url
+
+
+def _is_sqlite(url: str) -> bool:
+    return url.startswith("sqlite")
+
+
+def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode (generates SQL without a live DB)."""
+    url = get_url()
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+        render_as_batch=_is_sqlite(url),  # required for SQLite ALTER TABLE
+    )
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode (against a live database)."""
+    url = get_url()
+    cfg = config.get_section(config.config_ini_section, {})
+    cfg["sqlalchemy.url"] = url
+
+    connectable = engine_from_config(
+        cfg,
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=_is_sqlite(url),  # required for SQLite ALTER TABLE
+        )
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()

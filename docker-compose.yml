@@ -1,0 +1,29 @@
+# Docker Compose for SENTRA development services.
+# Only includes PostgreSQL — the Python app runs locally via Streamlit.
+# Usage:
+#   docker compose up -d        # start PostgreSQL
+#   docker compose down         # stop and remove containers
+#   docker compose down -v      # also remove the data volume
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sentra_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sentra
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: sentra_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - sentra_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentra -d sentra_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  sentra_pgdata:
+    driver: local
